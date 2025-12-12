@@ -1,0 +1,101 @@
+%%  How to run: https://mermaid.live/
+
+flowchart TD
+    Start([User Starts App]) --> CheckSession{Session Active?}
+    
+    %% Session Check
+    CheckSession -->|Yes| Dashboard[Dashboard]
+    CheckSession -->|No| LoginPage[Login Page]
+    
+    %% Login Flow
+    LoginPage --> EnterCreds[Enter Credentials]
+    EnterCreds --> ValidateInput{Valid Input?}
+    ValidateInput -->|No| ErrorMsg1[Show Error] 
+    ErrorMsg1 --> LoginPage
+    
+    ValidateInput -->|Yes| CheckLocked{Account Locked?}
+    CheckLocked -->|Yes| LockedMsg[Account Locked<br/>Try again later]
+    LockedMsg --> LoginPage
+    
+    CheckLocked -->|No| VerifyCredentials{Valid Credentials?}
+    VerifyCredentials -->|No| FailedAttempt[Increment Failed Attempts]
+    FailedAttempt --> CheckAttempts{≥5 Attempts?}
+    CheckAttempts -->|Yes| LockAccount[Lock Account<br/>15 minutes]
+    CheckAttempts -->|No| ErrorMsg2[Invalid Credentials]
+    LockAccount --> ErrorMsg2
+    ErrorMsg2 --> LoginPage
+    
+    VerifyCredentials -->|Yes| UpdateLogin[Update Last Login]
+    UpdateLogin --> SetSession[Set Session]
+    SetSession --> Dashboard
+    
+    %% Registration Flow
+    LoginPage --> RegLink[Register Link]
+    RegLink --> RegisterPage[Registration Page]
+    
+    RegisterPage --> FillForm[Fill Registration Form]
+    FillForm --> ValidateReg{Valid Data?}
+    ValidateReg -->|No| RegError[Show Validation Error]
+    RegError --> RegisterPage
+    
+    ValidateReg -->|Yes| CheckExists{User Exists?}
+    CheckExists -->|Yes| ExistsError[User Already Exists]
+    ExistsError --> RegisterPage
+    
+    CheckExists -->|No| CheckPassword{Strong Password?}
+    CheckPassword -->|No| WeakPassword[Password Too Weak]
+    WeakPassword --> RegisterPage
+    
+    CheckPassword -->|Yes| CreateUser[Create User Account]
+    CreateUser --> RegSuccess[Registration Success]
+    RegSuccess --> LoginPage
+    
+    %% Dashboard Features
+    Dashboard --> Profile[View Profile]
+    Dashboard --> Settings[Settings]
+    Dashboard --> Security[Security Settings]
+    Dashboard --> Activity[Activity Log]
+    
+    %% Security Features
+    Security --> ChangePassword[Change Password]
+    ChangePassword --> ValidateOld{Valid Old Password?}
+    ValidateOld -->|No| OldPassError[Incorrect Current Password]
+    OldPassError --> Security
+    ValidateOld -->|Yes| ValidateNew{Strong New Password?}
+    ValidateNew -->|No| NewPassError[Weak New Password]
+    NewPassError --> Security
+    ValidateNew -->|Yes| UpdatePassword[Update Password]
+    UpdatePassword --> PassSuccess[Password Updated]
+    PassSuccess --> Security
+    
+    %% Logout Flow
+    Dashboard --> Logout[Logout]
+    Profile --> Logout
+    Settings --> Logout
+    Security --> Logout
+    Activity --> Logout
+    
+    Logout --> ClearSession[Clear Session]
+    ClearSession --> LogoutSuccess[Logout Success]
+    LogoutSuccess --> LoginPage
+    
+    %% Password Strength Indicator
+    FillForm --> PasswordMeter[Real-time Password Strength]
+    PasswordMeter --> |Weak| WeakIndicator[Weak]
+    PasswordMeter --> |Medium| MediumIndicator[Medium]
+    PasswordMeter --> |Strong| StrongIndicator[Strong]
+    
+    %% Styling
+    classDef startEnd fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
+    classDef process fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef error fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    classDef success fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef security fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class Start,Dashboard startEnd
+    class LoginPage,RegisterPage,EnterCreds,FillForm,Profile,Settings,Activity,CreateUser,UpdateLogin,SetSession,ClearSession process
+    class CheckSession,ValidateInput,CheckLocked,VerifyCredentials,CheckAttempts,ValidateReg,CheckExists,CheckPassword,ValidateOld,ValidateNew decision
+    class ErrorMsg1,ErrorMsg2,RegError,ExistsError,WeakPassword,LockedMsg,FailedAttempt,LockAccount,OldPassError,NewPassError error
+    class RegSuccess,LogoutSuccess,PassSuccess,UpdatePassword success
+    class Security,ChangePassword,PasswordMeter,WeakIndicator,MediumIndicator,StrongIndicator security

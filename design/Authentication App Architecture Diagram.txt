@@ -1,0 +1,68 @@
+%%  How to run: https://mermaid.live/
+
+
+graph TB
+
+subgraph UI["User Interface Layer"]
+    A["main.py\nEntry Point & Router"] --> B["ui.py\nUI Components"]
+    B --> B1["Login Page"]
+    B --> B2["Register Page"]
+    B --> B3["Dashboard Page"]
+end
+
+subgraph AUTH["Authentication Layer"]
+    C["login.py\nAuth Logic"]
+    C --> C1["Password Hashing\nSHA-256 + Salt"]
+    C --> C2["User Verification"]
+    C --> C3["Account Locking"]
+    C --> C4["Password Validation"]
+    C --> C5["User Registration"]
+end
+
+subgraph DB["Database Layer"]
+    D["database.py\nDB Manager"]
+    D --> D1["Connection Pool"]
+    D --> D2["Health Checks"]
+    D --> D3["Index Management"]
+    D --> D4["Error Handling"]
+end
+
+subgraph MONGO["MongoDB Atlas"]
+    E["Users Collection"]
+    F["Dashboard Collection"]
+    G["Activity Logs"]
+end
+
+subgraph SEC["Security Features"]
+    H1["Password Strength Meter"]
+    H2["Failed Login Tracking"]
+    H3["Session Management"]
+    H4["Input Validation"]
+    H5["Environment Variables"]
+end
+
+%% System flow connections
+A --> C
+C --> D
+D --> E
+D --> F
+D --> G
+
+B1 --> H1
+B1 --> H2
+B2 --> H1
+B3 --> H3
+C2 --> H2
+C4 --> H4
+A --> H5
+
+U["User"] --> B1
+B1 -->|Valid Login| B3
+B1 -->|New User| B2
+B2 -->|Registration Success| B1
+B3 -->|Logout| B1
+
+C -->|CRUD Operations| D
+D -->|Store/Retrieve| E
+D -->|Dashboard Data| F
+D -->|Activity Tracking| G

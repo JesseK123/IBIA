@@ -1,0 +1,84 @@
+%%  How to run: https://mermaid.live/
+
+erDiagram
+    %% Users Collection
+    USERS {
+        ObjectId _id PK
+        string username UK "Unique, 3+ chars"
+        string email UK "Unique, lowercase"
+        string password "SHA-256 hashed"
+        string salt "Unique per user"
+        string role "user, admin, etc"
+        datetime created_at "Account creation"
+        datetime last_login "Last successful login"
+        boolean is_active "Account status"
+        int failed_login_attempts "Security tracking"
+        datetime account_locked_until "Lock expiration"
+    }
+    
+    %% Dashboard Data Collection
+    DASHBOARD_DATA {
+        ObjectId _id PK
+        string user_id FK "Reference to username"
+        object preferences "User settings"
+        object metrics "Dashboard metrics"
+        datetime created_at "Data creation"
+        datetime updated_at "Last modification"
+    }
+    
+    %% Activity Logs Collection
+    ACTIVITY_LOGS {
+        ObjectId _id PK
+        string user_id FK "Reference to username"
+        string action "login, logout, etc"
+        string ip_address "User IP"
+        object details "Additional info"
+        datetime timestamp "Action time"
+        string status "success, failed"
+    }
+    
+    %% Security Events Collection
+    SECURITY_EVENTS {
+        ObjectId _id PK
+        string user_id FK "Reference to username"
+        string event_type "failed_login, password_change"
+        string severity "low, medium, high"
+        object metadata "Event details"
+        datetime timestamp "Event time"
+        boolean resolved "Event status"
+    }
+    
+    %% Session Data Collection
+    SESSION_DATA {
+        ObjectId _id PK
+        string session_id UK "Unique session ID"
+        string user_id FK "Reference to username"
+        datetime created_at "Session start"
+        datetime expires_at "Session expiration"
+        object session_data "Session information"
+        boolean is_active "Session status"
+    }
+    
+    %% Relationships
+    USERS ||--o{ DASHBOARD_DATA : "has"
+    USERS ||--o{ ACTIVITY_LOGS : "generates"
+    USERS ||--o{ SECURITY_EVENTS : "triggers"
+    USERS ||--o{ SESSION_DATA : "creates"
+    
+    %% Indexes Diagram
+    INDEXES {
+        string collection "Collection name"
+        string field "Indexed field"
+        string type "Index type"
+        boolean unique "Uniqueness constraint"
+    }
+    
+    %% Index Details
+    USERS ||--o{ INDEXES : "username_idx"
+    USERS ||--o{ INDEXES : "email_idx"
+    USERS ||--o{ INDEXES : "created_at_idx"
+    DASHBOARD_DATA ||--o{ INDEXES : "user_id_idx"
+    ACTIVITY_LOGS ||--o{ INDEXES : "user_id_idx"
+    ACTIVITY_LOGS ||--o{ INDEXES : "timestamp_idx"
+    SECURITY_EVENTS ||--o{ INDEXES : "user_id_idx"
+    SESSION_DATA ||--o{ INDEXES : "session_id_idx"
