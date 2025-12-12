@@ -39,7 +39,7 @@ st.set_page_config(
     page_title="Investment Portfolio App",
     layout="wide",
     initial_sidebar_state="collapsed",
-    page_icon="📈",
+    page_icon="J",
 )
 
 # ---- INITIALIZE DATABASE ----
