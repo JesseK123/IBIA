@@ -8,17 +8,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class DatabaseConfig:
-    """MongoDB configuration, connection handling, health checks, and index creation."""
+    #MongoDB configuration, connection handling, health checks, and index creation.
 
     def __init__(self):
         self._client = None
         self._db = None
         self.database_name = os.getenv("DATABASE_NAME", "IA")
 
-    # ---- CONNECTION STRING ----
+    # CONNECTION STRING
     @property
     def connection_string(self):
-        """Return MongoDB URI from environment, checking several variable names."""
+        #Return MongoDB URI from environment, checking several variable names.
 
         # Priority list of possible variable names
         possible_keys = [
@@ -58,7 +58,7 @@ class DatabaseConfig:
 
     # ---- CONNECT ---
     def connect(self):
-        """Establish database connection and return success boolean."""
+        #Establish database connection and return success boolean.
         if self._client is not None:
             return True  # Already connected
 
@@ -91,9 +91,9 @@ class DatabaseConfig:
             self._client = None
             return False
 
-    # ----  DISCONNECT ----
+    #Disconnect
     def disconnect(self):
-        """Close active MongoDB client."""
+        #Close active MongoDB client.
         if self._client:
             try:
                 self._client.close()
@@ -101,19 +101,17 @@ class DatabaseConfig:
                 self._client = None
                 self._db = None
 
-    # ---- DATABASE + COLLECTION ACCESS ----
+    # Acces to database & collection
     def get_database(self):
-        """Return database instance, or None if unavailable."""
+        #Return database instance, or None if unavailable.
         return self._db if self.connect() else None
 
     def get_collection(self, name: str):
-        """Return collection reference, or None."""
+        #Return collection reference, or None.
         db = self.get_database()
-        # FIX: Use 'is not None' instead of truthiness test
-        # PyMongo objects don't support bool() / truth value testing
         return db[name] if db is not None else None
 
-    # ---- HEALTH CHECK ----
+    #Health Check
     def health_check(self):
         try:
             if self._client is not None:
@@ -123,9 +121,9 @@ class DatabaseConfig:
             st.error(f"Database health check failed: {str(e)}")
         return False
 
-    # ---- INDEXES ----
+    # creating indexes
     def create_indexes(self):
-        """Create performance indexes for all collections."""
+        #creating indexes for all collections
         db = self.get_database()
         if db is None:
             return False
@@ -157,11 +155,11 @@ class DatabaseConfig:
             return False
 
 
-# ---- GLOBAL INSTANCE ----
+#GLOBAL INSTANCE 
 db_config = DatabaseConfig()
 
 
-# ---- BACKWARD-COMPATIBLE HELPERS ----
+#BACKWARD-COMPATIBLE HELPERS
 def get_db():
     return db_config.get_database()
 
