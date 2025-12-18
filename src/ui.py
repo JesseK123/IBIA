@@ -25,7 +25,7 @@ from renderers import (
     render_stock_table,
     render_stock_performance_grid,
 )
-from algorithms import insertion_sort_portfolios
+from algorithms import insertion_sort_portfolios, recursive_portfolio_value
 from stocks import StockPredictor
 
 def handle_logout():
@@ -558,13 +558,13 @@ def portfolios_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- 2. PORTFOLIO OVERVIEW TABLE ----
+    # 2. PORTFOLIO OVERVIEW TABLE
     st.subheader("Portfolio Overview")
     render_portfolio_overview_table(user_portfolios)
 
     st.divider()
 
-    # ---- 3. LIST PORTFOLIOS AS CARDS WITH ACTION BUTTONS ----
+    # 3. LIST PORTFOLIOS AS CARDS WITH ACTION BUTTONS
     st.subheader("My Portfolios")
 
     # Sort portfolios by calculated value (descending)
@@ -1247,7 +1247,7 @@ def edit_portfolio_page(go_to, get_user_info, change_password):
     st.divider()
     
     st.subheader("Portfolio Summary")
-    total_value = sum(stock.get('price', 0) * stock.get('shares', 1) for stock in portfolio.get('stocks', []))
+    total_value =  recursive_portfolio_value(portfolio.get('stocks', []))
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Current Value", f"${total_value:.2f}")

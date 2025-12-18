@@ -1,37 +1,7 @@
-"""
-algorithms.py
---------------
-Custom algorithms implemented for IB HL Computer Science IA.
 
-Contains:
-A. Insertion Sort (for ranking portfolios)
-B. Binary Search - Iterative and Recursive (for efficient stock lookup)
-C. Manual Linear Regression (for stock price prediction)
-D. Recursive Portfolio Calculations
-E. Abstract Data Types (Stack for undo functionality)
-
-All algorithms include:
-- Time/Space complexity analysis (Big-O notation)
-- IB justification for algorithm choice
-- Comparison with alternatives
-"""
-
-
-# ==== INSERTION SORT (Portfolio Sorting) ====
+# INSERTION SORT (Portfolio Sorting)
 
 def _calculate_portfolio_value(portfolio):
-    """
-    Helper function to calculate total portfolio value from stocks.
-    
-    Time Complexity: O(n) where n = number of stocks in portfolio
-    Space Complexity: O(1) - only uses a single accumulator variable
-    
-    Args:
-        portfolio: dict containing 'stocks' list
-        
-    Returns:
-        float: Sum of (purchase_price × shares) for all stocks
-    """
     stocks = portfolio.get("stocks", [])
     total = 0.0
     for s in stocks:
@@ -42,23 +12,12 @@ def _calculate_portfolio_value(portfolio):
 
 
 def insertion_sort_portfolios(portfolios, key="value"):
-    """
-    Sort a list of portfolios in descending order using insertion sort.
-    
-    Args:
-        portfolios: list of portfolio dicts
-        key: the dictionary key to sort by (default: "value")
-        
-    Returns:
-        list: Sorted portfolios in descending order by value
-    """
     if not portfolios:
         return portfolios
     
-    # Create a working copy to avoid modifying the original list
+    # Create a copy
     portfolios = list(portfolios)
     
-    # Pre-calculate values if key is "value" and not present in portfolios
     if key == "value":
         for p in portfolios:
             if "value" not in p:
@@ -73,7 +32,6 @@ def insertion_sort_portfolios(portfolios, key="value"):
         item = portfolios[i]
         j = i - 1
         
-        # Get value safely with default of 0
         item_value = item.get(sort_key, 0)
 
         while j >= 0 and portfolios[j].get(sort_key, 0) < item_value:
@@ -166,24 +124,12 @@ def find_stock_symbol(all_symbols, target_symbol):
     return index != -1
 
 
-# ==== SECTION C: MANUAL LINEAR REGRESSION (Prediction Engine) ====
+#SECTION C: MANUAL LINEAR REGRESSION
 
 def manual_linear_regression(y_values):
-    """
-    Calculate slope and intercept using least squares method.
-    Implemented WITHOUT external libraries (no NumPy).
-    
-    Mathematical Formula:
-    --------------------
-    slope (m) = Σ((xi - x̄)(yi - ȳ)) / Σ((xi - x̄)²)
-    intercept (b) = ȳ - m × x̄
 
-    Args:
-        y_values: list of numeric values (e.g., stock prices)
-        
-    Returns:
-        tuple: (slope, intercept) for line equation y = mx + b
-    """
+    #Calculate slope and intercept using least squares method.
+
     n = len(y_values)
     
     if n == 0:
@@ -205,19 +151,6 @@ def manual_linear_regression(y_values):
 
 
 def predict_price(y_values, days_ahead=365):
-    """
-    Predict future stock price using manual linear regression.
-    
-    Time Complexity: O(n)
-    Space Complexity: O(n)
-    
-    Args:
-        y_values: historical price data
-        days_ahead: number of days to predict ahead
-        
-    Returns:
-        dict: Contains current price, predicted price, slope, intercept
-    """
     if len(y_values) < 30:
         return None
     

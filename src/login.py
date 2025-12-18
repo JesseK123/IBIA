@@ -1,13 +1,3 @@
-"""
-login.py
----------
-User authentication and portfolio management module.
-
-Security Features:
-- Password hashing using SHA-256 with salt
-- Safe database access patterns
-- Input validation
-"""
 
 import re
 import hashlib
@@ -17,37 +7,14 @@ from pymongo.errors import DuplicateKeyError
 import streamlit as st
 from bson import ObjectId
 from database import get_users_collection, get_portfolios_collection
+# SECURITY: PASSWORD HASHING AND VERIFICATION 
 
-
-# ===== SECURITY: PASSWORD HASHING AND VERIFICATION =====
-
-# Salt for password hashing (in production, use unique salt per user)
-PASSWORD_SALT = os.getenv("PASSWORD_SALT", "IB_CS_IA_2024_SECURE_SALT")
+# Salt for password hashing 
+PASSWORD_SALT = os.getenv("PASSWORD_SALT")
 
 
 def hash_password(password):
-    """
-    Hash a password using SHA-256 with salt.
-    
-    Why Hashing (not Encryption)?
-    ----------------------------
-    - Hashing is ONE-WAY: cannot recover original password
-    - Encryption is TWO-WAY: can decrypt back to original
-    - For passwords, we only need to VERIFY, not recover
-    - If database is breached, hashed passwords are useless to attacker
-    
-    Why Salt?
-    ---------
-    - Prevents "rainbow table" attacks
-    - Same password produces different hash with different salt
-    - Makes brute-force attacks much harder
-    
-    Args:
-        password: Plain text password
-        
-    Returns:
-        str: SHA-256 hash of salted password (64 hex characters)
-    """
+
     # Combine password with salt
     salted_password = password + PASSWORD_SALT
     
@@ -59,67 +26,21 @@ def hash_password(password):
 
 
 def verify_password(plain_password, hashed_password):
-    """
-    Verify a password against its hash.
-    
-    Time Complexity: O(n)
-    Space Complexity: O(1)
-    
-    Args:
-        plain_password: Password attempt from user
-        hashed_password: Stored hash from database
-        
-    Returns:
-        bool: True if password matches
-    """
     return hash_password(plain_password) == hashed_password
 
 
-# ==== SAFE COLLECTION ACCESS ====
+# SAFE COLLECTION ACCESS
 
 def get_collection_safely(collection_getter):
-    """
-    Safely attempt to retrieve a MongoDB collection.
-    
-    Error Handling Pattern:
-    ----------------------
-    - Returns tuple (collection, None) on success
-    - Returns tuple (None, error_tuple) on failure
-    - Allows caller to handle errors gracefully
-    
-    Args:
-        collection_getter: Function that returns a collection
-        
-    Returns:
-        tuple: (collection, None) if OK, (None, (False, error_message)) if failed
-    """
     collection = collection_getter()
     if collection is None:
         return None, (False, "Database connection failed (collection unavailable)")
     return collection, None
 
 
-# ==== USER AUTHENTICATION ====
+# USER AUTHENTICATION
 
 def verify_user(username, password):
-    """
-    Validate login credentials.
-    
-    Process:
-    1. Fetch user record by username
-    2. Hash the provided password
-    3. Compare with stored hash
-    
-    Time Complexity: O(1) for database lookup (indexed)
-    Space Complexity: O(1)
-    
-    Args:
-        username: Username to verify
-        password: Plain text password attempt
-        
-    Returns:
-        bool: True if credentials are valid
-    """
     try:
         users = get_users_collection()
         if users is None:
@@ -151,20 +72,11 @@ def verify_user(username, password):
         return False
 
 
-# ==== USER VALIDATION UTILITIES ====
+# USER VALIDATION UTILITIES
 
 def user_exists(username):
-    """
-    Check if username already exists in database.
-    
-    Time Complexity: O(1) - indexed lookup
-    
-    Args:
-        username: Username to check
-        
-    Returns:
-        bool: True if username exists
-    """
+    # Check if username already exists in database.
+
     try:
         users, error = get_collection_safely(get_users_collection)
         if error is not None:
@@ -178,45 +90,15 @@ def user_exists(username):
 
 
 def validate_email(email):
-    """
-    Validate email format using regex.
-    
-    Pattern Explanation:
-    -------------------
-    ^[a-zA-Z0-9._%+-]+  : Start with alphanumeric or special chars
-    @                    : Must have @ symbol
-    [a-zA-Z0-9.-]+      : Domain name
-    \\.[a-zA-Z]{2,}$     : TLD (e.g., .com, .org)
-    
-    Time Complexity: O(n) where n = email length
-    
-    Args:
-        email: Email address to validate
-        
-    Returns:
-        bool: True if valid format
-    """
+    #Validate email format using Regular Expression Module.
+
     pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return re.match(pattern, email) is not None
 
 
 def validate_password_strength(password):
-    """
-    Check password meets security requirements.
-    
-    Requirements:
-    - Minimum 8 characters
-    - At least one uppercase letter
-    - At least one lowercase letter
-    - At least one digit
-    - At least one special character
-    
-    Args:
-        password: Password to validate
-        
-    Returns:
-        tuple: (is_valid, error_message)
-    """
+    #Check password meets security requirements.
+
     if len(password) < 8:
         return False, "Password must be at least 8 characters"
     
@@ -235,35 +117,17 @@ def validate_password_strength(password):
     return True, "Password meets requirements"
 
 
-# ==== USER REGISTRATION ====
+# USER REGISTRATION
 
 def register_user(username, password, email):
-    """
-    Create a new user account.
-    
-    Process:
-    1. Validate all inputs
-    2. Check for existing username/email
-    3. Hash password
-    4. Create user document
-    5. Insert into database
-    
-    Time Complexity: O(1) for database operations (indexed)
-    
-    Args:
-        username: Desired username
-        password: Plain text password
-        email: User's email
-        
-    Returns:
-        tuple: (success, message)
-    """
+# Create a new user account.
+
     try:
         users, error = get_collection_safely(get_users_collection)
         if error is not None:
             return error
 
-        # ---- Validate Inputs ----
+        # Validate Inputs
         if not username or not password or not email:
             return False, "All fields are required"
 
@@ -284,10 +148,10 @@ def register_user(username, password, email):
         if users.find_one({"email": email.lower()}):
             return False, "Email already registered"
 
-        # ---- Create User Document ----
+        #Create User Document in collection
         user_doc = {
             "username": username,
-            "password": hash_password(password),  # HASHED, not plain text!
+            "password": hash_password(password),  # HASHED
             "email": email.lower(),
             "role": "user",
             "created_at": datetime.now(timezone.utc),
@@ -306,17 +170,10 @@ def register_user(username, password, email):
         return False, "Registration failed"
 
 
-# ==== USER SESSION MANAGEMENT ====
+#USER SESSION MANAGEMENT
 
 def update_last_login(username):
-    """
-    Record timestamp of last successful login.
-    
-    Time Complexity: O(1)
-    
-    Args:
-        username: User who logged in
-    """
+
     try:
         users, error = get_collection_safely(get_users_collection)
         if error is not None:
@@ -332,15 +189,7 @@ def update_last_login(username):
 
 
 def get_user_info(username):
-    """
-    Retrieve user profile (excluding sensitive data).
-    
-    Args:
-        username: User to look up
-        
-    Returns:
-        dict or None: User profile without password
-    """
+
     try:
         users, error = get_collection_safely(get_users_collection)
         if error is not None:
@@ -365,26 +214,9 @@ def get_user_info(username):
         return None
 
 
-# ==== PASSWORD MANAGEMENT ====
+# PASSWORD MANAGEMENT
 
 def change_password(username, old_password, new_password):
-    """
-    Change user password after verifying current password.
-    
-    Process:
-    1. Verify old password
-    2. Validate new password strength
-    3. Hash new password
-    4. Update in database
-    
-    Args:
-        username: User changing password
-        old_password: Current password for verification
-        new_password: New password to set
-        
-    Returns:
-        tuple: (success, message)
-    """
     try:
         if not verify_user(username, old_password):
             return False, "Incorrect current password"
@@ -410,19 +242,10 @@ def change_password(username, old_password, new_password):
         return False, "Password change failed"
 
 
-# ==== PORTFOLIO MANAGEMENT ====
+# PORTFOLIO MANAGEMENT
 
 def create_portfolio(username, portfolio_data):
-    """
-    Create a new investment portfolio.
-    
-    Args:
-        username: Portfolio owner
-        portfolio_data: dict with name, countries, stocks
-        
-    Returns:
-        tuple: (success, message)
-    """
+
     try:
         portfolios, error = get_collection_safely(get_portfolios_collection)
         if error is not None:

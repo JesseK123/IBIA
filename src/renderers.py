@@ -3,7 +3,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import timedelta
-
+from algorithms import recursive_portfolio_value
 
 from stocks import (
     stock_snapshot,
@@ -23,10 +23,7 @@ def render_community_portfolios(portfolios, go_to):
         owner = p.get("user_id", "Unknown")
         stocks = p.get("stocks", [])
 
-        invested = sum(
-            s.get("purchase_price", s.get("price", 0)) * s.get("shares", 1)
-            for s in stocks
-        )
+        invested = recursive_portfolio_value(stocks)
 
         predicted = 0
         for s in stocks:
@@ -108,10 +105,7 @@ def render_portfolio_overview_table(user_portfolios):
 
     for p in user_portfolios:
         stocks = p.get("stocks", [])
-        invested = sum(
-            s.get("purchase_price", s.get("price", 0)) * s.get("shares", 1)
-            for s in stocks
-        )
+        invested = recursive_portfolio_value(stocks)
 
         predicted_total = 0
         for s in stocks:

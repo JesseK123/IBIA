@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class DatabaseConfig:
-    #MongoDB configuration, connection handling, health checks, and index creation.
+    #MongoDB configuration
 
     def __init__(self):
         self._client = None
@@ -18,19 +18,13 @@ class DatabaseConfig:
     # CONNECTION STRING
     @property
     def connection_string(self):
-        #Return MongoDB URI from environment, checking several variable names.
+        # Retrieve MongoDB URI from environment file
 
-        # Priority list of possible variable names
-        possible_keys = [
-            "MONGO_URI",
-            "MONGODB_URI",
-            "DATABASE_URL",
-            "MONGODB_CONNECTION_STRING",
-            "DB_URI",
-        ]
+        # Variable name
+        keys = ["MONGO_URI"]
 
         uri = None
-        for key in possible_keys:
+        for key in keys:
             uri = os.getenv(key)
             if uri:
                 break
@@ -38,27 +32,25 @@ class DatabaseConfig:
         if not uri:
             st.error(
                 "MongoDB connection string not found. "
-                "Set one of: MONGO_URI, MONGODB_URI, DATABASE_URL, "
-                "MONGODB_CONNECTION_STRING, or DB_URI."
             )
             return None
 
-        # Mask credentials in logs (but NOT returned)
+        # Hides sensitive information
         try:
             if "://" in uri and "@" in uri:
                 before_at = uri.split("://")[1].split("@")[0]
                 safe = uri.replace(before_at, "***:***")
             else:
                 safe = "***"
-            print(f"[INFO] MongoDB connection string loaded: {safe}")
+            print(safe)
         except Exception:
             pass
 
         return uri
 
-    # ---- CONNECT ---
+    # Connect
     def connect(self):
-        #Establish database connection and return success boolean.
+        # Establish database connection and return success boolean.
         if self._client is not None:
             return True  # Already connected
 
@@ -103,11 +95,11 @@ class DatabaseConfig:
 
     # Acces to database & collection
     def get_database(self):
-        #Return database instance, or None if unavailable.
+        #Return database state, or None if unavailable
         return self._db if self.connect() else None
 
     def get_collection(self, name: str):
-        #Return collection reference, or None.
+        #Return collection reference, or None
         db = self.get_database()
         return db[name] if db is not None else None
 

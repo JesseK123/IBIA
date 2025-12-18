@@ -1,9 +1,9 @@
 # stocks.py
 
 import yfinance as yf
-import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+from algorithms import manual_linear_regression
 
 # ==== Price Fetching Utilities ====
 
@@ -132,48 +132,38 @@ def portfolio_summary(stocks: list[dict]) -> dict:
 # ==== Linear Regression Prediction Utility ====
 
 def linear_prediction(price_series: pd.Series, future_days: int = 365) -> dict | None:
-    """
-    Perform simple linear regression forecasting future stock price.
-    Returns:
-        {
-            slope,
-            intercept,
-            current_price,
-            predicted_price,
-            future_predictions,
-            reg_line
-        }
-    If < 30 days of data, returns None.
-    """
 
     if price_series is None or len(price_series) < 30:
         return None
 
-    # Convert to numpy arrays
-    X = np.arange(len(price_series))
-    y = price_series.values
+    # Convert pandas Series to list for custom algorithm
+    y_values = price_series.values.tolist()
+    
+    slope, intercept = manual_linear_regression(y_values)
 
-    # Fit regression line
-    slope, intercept = np.polyfit(X, y, 1)
+    # Generate regression line for historical data
+    n = len(y_values)
+    reg_line = [slope * i + intercept for i in range(n)]
 
-    # Regression line for historical data
-    reg_line = slope * X + intercept
-
-    # Future prediction
-    future_X = np.arange(len(price_series), len(price_series) + future_days)
-    future_predictions = slope * future_X + intercept
+    # Future predictions
+    future_predictions = [
+        slope * (n + i) + intercept 
+        for i in range(future_days)
+    ]
 
     predicted_price = future_predictions[-1]
-    current_price = y[-1]
+    current_price = y_values[-1]
 
-    # Optional model quality metric
-    ss_res = np.sum((y - reg_line) ** 2)
-    ss_tot = np.sum((y - np.mean(y)) ** 2)
+    # Calculate R² (model quality metric)
+    # R² = 1 - (SS_res / SS_tot)
+    y_mean = sum(y_values) / len(y_values)
+    ss_res = sum((y_values[i] - reg_line[i]) ** 2 for i in range(n))
+    ss_tot = sum((y - y_mean) ** 2 for y in y_values)
     r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0
 
     return {
-        "slope": slope,
-        "intercept": intercept,
+        "slope": float(slope),
+        "intercept": float(intercept),
         "current_price": float(current_price),
         "predicted_price": float(predicted_price),
         "future_predictions": future_predictions,
