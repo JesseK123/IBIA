@@ -80,7 +80,7 @@ def user_exists(username):
     try:
         users, error = get_collection_safely(get_users_collection)
         if error is not None:
-            return True  # Fail-safe: assume exists
+            return True  # Assume exists
 
         return users.find_one({"username": username}) is not None
 
@@ -413,16 +413,6 @@ def delete_portfolio(portfolio_id, username):
 # ==== STOCK MANAGEMENT IN PORTFOLIOS ====
 
 def add_stock_to_portfolio(portfolio_id, stock_data):
-    """
-    Add a stock to a portfolio.
-    
-    Args:
-        portfolio_id: Target portfolio
-        stock_data: Stock details (symbol, shares, price)
-        
-    Returns:
-        tuple: (success, message)
-    """
     try:
         portfolios, error = get_collection_safely(get_portfolios_collection)
         if error is not None:
