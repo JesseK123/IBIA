@@ -647,7 +647,7 @@ def _render_share_panel(portfolio_data):
     with st.expander(f"Share Portfolio: {name}", expanded=True):
         st.write("**Share your portfolio with others:**")
 
-        url = f"https://yourapp.com/shared-portfolio/{p_id}"
+        url = f"https://sharelink.com/shared-portfolio/{p_id}"
 
         template = f"""
 Investment Portfolio Template: "{name}"
