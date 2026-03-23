@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from algorithms import manual_linear_regression
 
-# ==== Price Fetching Utilities ====
+#Fetch Price
 
 def fetch_current_price(symbol: str, fallback: float | None = None) -> float | None:
     """
@@ -47,7 +47,6 @@ def fetch_long_history(symbol: str, years: int = 2) -> pd.DataFrame:
     except Exception:
         return pd.DataFrame()
 
-# ==== Stock-Level Computations ====
 
 def stock_snapshot(stock: dict) -> dict:
     """
@@ -96,7 +95,6 @@ def stock_snapshot(stock: dict) -> dict:
         "gain_pct": float(gain_pct),
     }
 
-# ==== Portfolio-Level Computations ====
 
 def portfolio_summary(stocks: list[dict]) -> dict:
     """
@@ -129,7 +127,7 @@ def portfolio_summary(stocks: list[dict]) -> dict:
         "gain_pct": gain_pct,
     }
 
-# ==== Linear Regression Prediction Utility ====
+#Linear Regression
 
 def linear_prediction(price_series: pd.Series, future_days: int = 365) -> dict | None:
 
@@ -138,6 +136,7 @@ def linear_prediction(price_series: pd.Series, future_days: int = 365) -> dict |
 
     # Convert pandas Series to list for custom algorithm
     y_values = price_series.values.tolist()
+    
     
     slope, intercept = manual_linear_regression(y_values)
 
@@ -171,35 +170,10 @@ def linear_prediction(price_series: pd.Series, future_days: int = 365) -> dict |
         "r_squared": float(r_squared),
     }
 
-# ============================================================================
-# STOCK PREDICTOR CLASS (OOP Implementation)
-# ============================================================================
 
 class StockPredictor:
-    """
-    OOP wrapper for stock price prediction using linear regression.
-    Features:
-    1. Encapsulates prediction logic and state
-    2. Demonstrates OOP principles (encapsulation, abstraction)
-    3. Maintains prediction history for a single stock
-    4. Provides clean interface for prediction operations
-    
-    Attributes:
-        _symbol: Stock ticker symbol
-        _price_history: Historical price data
-        _prediction: Cached prediction results
-    """
-    
     def __init__(self, symbol: str):
-        """
-        Initialize predictor for a specific stock.
-        
-        Time Complexity: O(1)
-        Space Complexity: O(1)
-        
-        Args:
-            symbol: Stock ticker symbol (e.g., "AAPL")
-        """
+
         self._symbol = symbol
         self._price_history = None
         self._prediction = None

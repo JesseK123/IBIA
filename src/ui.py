@@ -43,7 +43,7 @@ def format_percentage_with_color(percentage):
         return f'<span style="color: gray;">{percentage:.2f}%</span>'
 
 
-# ==================== UI COMPONENTS AND SIDEBAR RENDERING ====================
+#Sidebar
 
 def render_sidebar(page_title, actions=None, back_button=None):
     """Render a dynamic sidebar with page title, action buttons, navigation, and logout."""
@@ -263,7 +263,7 @@ def register_page(go_to, register_user):
             success, message = register_user(username, password, email)
             if success:
                 st.success(message)
-                st.balloons()  # Celebration animation
+                st.balloons() 
                 go_to("login")
             else:
                 st.error(message)
@@ -345,7 +345,6 @@ def dashboard_page(go_to, get_user_info, change_password):
     render_global_market_dashboard(STOCK_SYMBOLS_BY_COUNTRY)
 
 def stock_analysis_page(go_to, get_user_info, change_password):
-    # ---- SIDEBAR ----
     with st.sidebar:
         st.header("Stock Analysis")
         st.subheader("Stock Search")
@@ -361,7 +360,7 @@ def stock_analysis_page(go_to, get_user_info, change_password):
             placeholder="Type to search (e.g., AAPL, GOOGL, TSLA...)"
         )
 
-        # --- Filter matching symbols ---
+        #Filter
         if search_query:
             filtered = [s for s in all_stock_symbols if search_query.upper() in s.upper()]
             if filtered:
@@ -381,7 +380,7 @@ def stock_analysis_page(go_to, get_user_info, change_password):
 
         selected = st.session_state.get("selected_stock_symbol", selected)
 
-        # ---- Analysis Tools ----
+        #Analysis
         st.subheader("Analysis Tools")
         show_volume = st.checkbox("Show Volume", True)
         show_moving_avg = st.checkbox("Show Moving Average", False)
@@ -395,7 +394,6 @@ def stock_analysis_page(go_to, get_user_info, change_password):
         if st.button("Logout", width="stretch"):
             handle_logout()
 
-    # ---- MAIN CONTENT ----
     st.title(f"{selected} - Detailed Analysis")
 
     # Load 10yr history
@@ -425,7 +423,7 @@ def stock_analysis_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- PRICE CHART ----
+    #Price
     col_a, col_b = st.columns([3, 2])
 
     with col_a:
@@ -445,7 +443,6 @@ def stock_analysis_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- RECENT PERFORMANCE ----
     col_l, col_r = st.columns([2, 3])
 
     with col_l:
@@ -472,7 +469,7 @@ def stock_analysis_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- PREDICTION ----
+    #Prediction
     st.subheader("Price Prediction (Linear Regression)")
 
     predictor = StockPredictor(selected)
@@ -510,7 +507,7 @@ def stock_analysis_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- COMPANY NEWS ----
+    #News
     st.subheader("Company News")
     info = get_company_news_link(selected)
 
@@ -525,7 +522,6 @@ def stock_analysis_page(go_to, get_user_info, change_password):
 def portfolios_page(go_to, get_user_info, change_password):
     """Refactored portfolio manager using renderers + unified prediction engine."""
 
-    # ---- SIDEBAR ----
     render_sidebar(
         "Portfolio Manager",
         actions=[
@@ -537,7 +533,6 @@ def portfolios_page(go_to, get_user_info, change_password):
 
     st.title("Portfolio Management")
 
-    # ---- Fetch user portfolios ----
     user_portfolios = get_user_portfolios(st.session_state.username)
 
     if not user_portfolios:
@@ -546,7 +541,7 @@ def portfolios_page(go_to, get_user_info, change_password):
             go_to("create_portfolio")
         return
 
-    # ---- 1. PORTFOLIO SUMMARY ----
+    #1. PORTFOLIO SUMMARY
     st.subheader("Your Portfolios Summary")
     
     # Combine all stocks from all portfolios
@@ -631,7 +626,7 @@ def _render_single_portfolio_card(portfolio, go_to):
                 st.session_state.confirm_delete_name = name
                 st.rerun()
 
-        # --- Optional share panel ---
+        #Share Panel
         if st.session_state.get("share_portfolio", {}).get("_id") == p_id:
             _render_share_panel(st.session_state.share_portfolio)
 
@@ -1074,7 +1069,7 @@ def show_stock_historical_data(symbol, name):
 def stock_search_page(go_to, get_user_info, change_password):
     """Search available stocks from all markets and add them to a portfolio."""
 
-    # ---- Ensure portfolio exists ----
+    #Exists?
     if 'current_portfolio' not in st.session_state:
         st.warning("No portfolio selected.")
         if st.button("Go to Portfolios"):
@@ -1084,7 +1079,6 @@ def stock_search_page(go_to, get_user_info, change_password):
     portfolio = st.session_state.current_portfolio
     portfolio_id = portfolio.get("_id")
 
-    # ---- Sidebar ----
     render_sidebar(
         "Stock Search",
         back_button={'label': 'Back to My Stocks', 'callback': lambda: go_to("my_stocks")}
@@ -1093,11 +1087,9 @@ def stock_search_page(go_to, get_user_info, change_password):
     st.title("Stock Search")
     st.markdown("### Find and add stocks to your portfolio")
 
-    # ---- Country dropdown ----
     available_countries = ["All"] + list(STOCK_SYMBOLS_BY_COUNTRY.keys())
     selected_country = st.selectbox("Country", available_countries)
 
-    # ---- Search box ----
     search_query = st.text_input(
         "Search for stocks (symbol or company name)",
         placeholder="e.g., AAPL, Apple, Tesla"
@@ -1105,7 +1097,7 @@ def stock_search_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- Load stock list ----
+
     if selected_country != "All":
         all_stocks = get_stocks_for_search(selected_country)
     else:
@@ -1113,7 +1105,7 @@ def stock_search_page(go_to, get_user_info, change_password):
         for country in STOCK_SYMBOLS_BY_COUNTRY.keys():
             all_stocks.extend(get_stocks_for_search(country))
 
-    # ---- Filter results ----
+
     if search_query:
         filtered = [
             s for s in all_stocks
@@ -1122,7 +1114,7 @@ def stock_search_page(go_to, get_user_info, change_password):
     else:
         filtered = all_stocks
 
-    # ---- Display results ----
+
     for stock in filtered:
         with st.container():
             col1, col2, col3, col4, col5, col6 = st.columns([3, 2, 1.5, 1.5, 2, 1])
@@ -1136,7 +1128,7 @@ def stock_search_page(go_to, get_user_info, change_password):
             with col4:
                 st.write(f"{stock['change']:+.2f}")
 
-            # ---- ADD STOCK FORM ----
+
             with col5:
                 with st.form(key=f"add_{stock['symbol']}"):
                     shares = st.number_input("Shares", min_value=1, value=1)
@@ -1338,7 +1330,7 @@ def edit_portfolio_page(go_to, get_user_info, change_password):
 
         st.divider()
         
-        # ---- Add More Stocks Button ----
+        #Add More Stocks Button
         if st.button("Add More Stocks", width="stretch"):
             st.session_state.current_portfolio = {
                 '_id': portfolio_id,
@@ -1362,9 +1354,8 @@ def edit_portfolio_page(go_to, get_user_info, change_password):
 def portfolio_details_page(go_to, get_user_info, change_password):
     """Render detailed portfolio view with stock performance analysis (refactored)."""
 
-    # -------------------------------------------------------------------
+
     # Validate portfolio selection
-    # -------------------------------------------------------------------
     if "view_portfolio_id" not in st.session_state:
         st.error("No portfolio selected for viewing.")
         go_to("portfolios")
@@ -1380,9 +1371,9 @@ def portfolio_details_page(go_to, get_user_info, change_password):
 
     stocks = portfolio.get("stocks", [])
 
-    # -------------------------------------------------------------------
+
     # Sidebar (Info + reusable sidebar renderer)
-    # -------------------------------------------------------------------
+
     st.sidebar.markdown(f"**Portfolio:** {portfolio['portfolio_name']}")
     st.sidebar.markdown(
         f"**Created:** {portfolio['created_at'].strftime('%Y-%m-%d') if portfolio.get('created_at') else 'Unknown'}"
@@ -1417,11 +1408,11 @@ def portfolio_details_page(go_to, get_user_info, change_password):
         }
     )
 
-    # ---- Page Heading ----
+    #Page Heading
     st.title("Portfolio Details")
     st.markdown(f"### {portfolio['portfolio_name']}")
 
-    # ---- No stocks yet ----
+    #No stocks yet
     if not stocks:
         if st.button("Add Stocks", type="primary"):
             st.session_state.current_portfolio = {
@@ -1433,16 +1424,16 @@ def portfolio_details_page(go_to, get_user_info, change_password):
             go_to("stock_search")
         return
 
-    # ---- Summary Metrics (Purchase Value, Current Value, Gain/Loss) ----
+
     render_portfolio_summary(stocks)
 
-    # ---- Table of Holdings ----
+
     st.subheader("Stock Holdings Detail")
     render_stock_table(stocks)
 
     st.divider()
 
-    # ---- Individual Stock Performance Cards ----
+ 
     st.subheader("Individual Stock Performance")
     render_stock_performance_grid(stocks)
 
@@ -1536,7 +1527,7 @@ def portfolio_analytics_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- Individual Prediction Panels ----
+    #Individual Prediction Panels
     st.subheader("Individual Stock Predictions")
 
     for item in predictions:
@@ -1552,7 +1543,7 @@ def portfolio_analytics_page(go_to, get_user_info, change_password):
 def media_portfolio_view_page(go_to, get_user_info, change_password):
     """Read-only community portfolio view — fully refactored."""
 
-    # ---- Validate portfolio selection ----
+    #Validate portfolio selection
     if "media_portfolio_id" not in st.session_state:
         st.error("No portfolio selected for viewing.")
         go_to("dashboard")
@@ -1573,7 +1564,7 @@ def media_portfolio_view_page(go_to, get_user_info, change_password):
 
     stocks = portfolio.get("stocks", [])
 
-    # ---- Sidebar (Info + reusable sidebar renderer) ----
+    #Sidebar (Info + reusable sidebar renderer)
     st.sidebar.markdown(f"**Owner:** {owner_username}")
     st.sidebar.markdown(
         f"**Created:** {portfolio['created_at'].strftime('%Y-%m-%d')}"
@@ -1590,7 +1581,7 @@ def media_portfolio_view_page(go_to, get_user_info, change_password):
         }
     )
 
-    # ---- Page Header ----
+    # Page Header
     st.title(f"{owner_username}'s Portfolio")
 
     if not stocks:

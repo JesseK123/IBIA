@@ -139,24 +139,7 @@ def render_portfolio_overview_table(user_portfolios):
     df = pd.DataFrame(rows)
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-def render_prediction_summary(symbol, price_series):
-    """Display prediction summary metrics for a single stock."""
-    if price_series is None or len(price_series) < 2:
-        st.warning("Not enough data for prediction summary.")
-        return
-    
-    latest = price_series.iloc[-1]
-    previous = price_series.iloc[-2]
-    change = latest - previous
-    pct = (change / previous * 100) if previous != 0 else 0
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Current Price", f"${latest:.2f}", f"{change:+.2f}")
-    with col2:
-        st.metric("Daily Change (%)", f"{pct:+.2f}%")
-
-# ==== STOCK TABLE RENDERER =====
+#STOCK TABLE
 
 def render_stock_table(stocks: list[dict], *, show_change=True):
     """
@@ -191,7 +174,7 @@ def render_stock_table(stocks: list[dict], *, show_change=True):
     st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 
-# ==== PORTFOLIO SUMMARY METRICS =====
+#Portfolio Summary
 
 def render_portfolio_summary(stocks: list[dict]):
     """
@@ -216,7 +199,7 @@ def render_portfolio_summary(stocks: list[dict]):
     st.divider()
 
 
-# ==== INDIVIDUAL STOCK PERFORMANCE GRID =====
+#Individual stock
 
 def render_stock_performance_grid(stocks: list[dict]):
     """
@@ -260,7 +243,6 @@ def render_stock_performance_grid(stocks: list[dict]):
             st.markdown("---")
 
 
-# ==== LINEAR PREDICTION SUMMARY BLOCK =====
 
 def render_prediction_summary(stock_name: str, price_series: pd.Series):
     """
@@ -291,7 +273,7 @@ def render_prediction_summary(stock_name: str, price_series: pd.Series):
     return pred
 
 
-# ==== PREDICTION CHART RENDERER =====
+#prediction
 
 def render_prediction_chart(price_series: pd.Series, pred: dict, *, lookback_days=365):
     """

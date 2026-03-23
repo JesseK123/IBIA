@@ -80,12 +80,9 @@ ROUTES = {
 }
 
 
-# ---- MAIN APPLICATION ----
+
 def main():
 
-    # -------------------------
-    # CUSTOM CSS
-    # -------------------------
     st.markdown("""
     <style>
     .status-indicator {
@@ -105,11 +102,10 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # ---- CONNECTION BADGE ----
+
     if st.session_state.db_initialized:
         st.markdown('<div class="status-indicator">Connected</div>', unsafe_allow_html=True)
 
-    # ---- AUTH ROUTING  ----
     if st.session_state.logged_in:
 
         page = st.session_state.get("page", "dashboard")
@@ -131,6 +127,5 @@ def main():
             login_page(go_to, verify_user, update_last_login)
 
 
-# ---- RUN MAIN FUNCTION ----
 if __name__ == "__main__":
     main()
