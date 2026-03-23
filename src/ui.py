@@ -596,7 +596,7 @@ def _render_single_portfolio_card(portfolio, go_to):
         with col2:
             st.metric("Current Value", f"${total_value:,.2f}")
 
-        # --- Action buttons ---
+        #Action buttons
         col_view, col_edit, col_share, col_delete = st.columns(4)
 
         with col_view:
@@ -1437,7 +1437,7 @@ def portfolio_details_page(go_to, get_user_info, change_password):
     st.subheader("Individual Stock Performance")
     render_stock_performance_grid(stocks)
 
-    # ---- Future expansion: analytics section toggle ----
+    #
     if st.session_state.get("show_portfolio_details_analytics", False):
         st.divider()
         st.subheader("Portfolio Analytics & Predictions")
@@ -1474,7 +1474,7 @@ def portfolio_analytics_page(go_to, get_user_info, change_password):
         st.info("No stocks available to analyze.")
         return
 
-    # ---- Overall Prediction ----
+    #Overall Prediction
     st.subheader("Overall Portfolio Value Prediction")
 
     total_current = 0
@@ -1601,7 +1601,7 @@ def media_portfolio_view_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- Prediction Analytics ----
+    # Prediction Analytics
     st.subheader("Portfolio Prediction Analytics")
 
     total_current = 0
@@ -1640,7 +1640,7 @@ def media_portfolio_view_page(go_to, get_user_info, change_password):
         st.warning("No predictions available — insufficient historical data.")
         return
 
-    # ---- Portfolio-level prediction summary ----
+    #Portfolio-level prediction summary
     diff = total_predicted - total_current
     pct = (diff / total_current * 100) if total_current else 0
 
@@ -1658,7 +1658,7 @@ def media_portfolio_view_page(go_to, get_user_info, change_password):
 
     st.divider()
 
-    # ---- Individual prediction panels ----
+    #Individual prediction panels
     st.subheader("Individual Stock Predictions")
 
     for item in predictions:
