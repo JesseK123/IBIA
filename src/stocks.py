@@ -8,10 +8,7 @@ from algorithms import manual_linear_regression
 #Fetch Price
 
 def fetch_current_price(symbol: str, fallback: float | None = None) -> float | None:
-    """
-    Return the latest closing price for a symbol.
-    Falls back to the provided fallback value if unavailable.
-    """
+
     if not symbol:
         return fallback
 
@@ -25,10 +22,7 @@ def fetch_current_price(symbol: str, fallback: float | None = None) -> float | N
 
 
 def fetch_history(symbol: str, period: str = "1mo") -> pd.DataFrame:
-    """
-    Return historical OHLC data for a symbol.
-    Always returns a DataFrame (empty on error).
-    """
+
     try:
         df = yf.Ticker(symbol).history(period=period, auto_adjust=True)
         return df if not df.empty else pd.DataFrame()
@@ -37,10 +31,7 @@ def fetch_history(symbol: str, period: str = "1mo") -> pd.DataFrame:
 
 
 def fetch_long_history(symbol: str, years: int = 2) -> pd.DataFrame:
-    """
-    Return long-term historical data.
-    years=2 → fetch 2 years of history.
-    """
+
     try:
         df = yf.Ticker(symbol).history(period=f"{years}y", auto_adjust=True)
         return df if not df.empty else pd.DataFrame()
@@ -49,25 +40,7 @@ def fetch_long_history(symbol: str, years: int = 2) -> pd.DataFrame:
 
 
 def stock_snapshot(stock: dict) -> dict:
-    """
-    Given a stock dict:
-        {
-            "symbol": "AAPL",
-            "shares": 10,
-            "purchase_price": 150,
-            "current_price": 165 (optional)
-        }
 
-    Returns a consistent snapshot:
-        {
-            purchase_price,
-            current_price,
-            purchase_value,
-            current_value,
-            gain,
-            gain_pct
-        }
-    """
 
     symbol = stock.get("symbol")
     shares = stock.get("shares", 1)
@@ -97,17 +70,7 @@ def stock_snapshot(stock: dict) -> dict:
 
 
 def portfolio_summary(stocks: list[dict]) -> dict:
-    """
-    Aggregate summary for an entire portfolio based on stock_snapshot results.
 
-    Returns:
-        {
-            total_purchase,
-            total_current,
-            gain,
-            gain_pct
-        }
-    """
 
     total_purchase = 0.0
     total_current = 0.0
@@ -180,43 +143,19 @@ class StockPredictor:
     
     @property
     def symbol(self):
-        """Get stock symbol (read-only)."""
         return self._symbol
     
     @property
     def has_prediction(self):
-        """Check if prediction has been generated."""
         return self._prediction is not None
     
     def load_history(self, years: int = 2):
-        """
-        Load historical price data for the stock.
-        
-        Time Complexity: O(1) for API call
-        Space Complexity: O(n) where n = trading days
-        
-        Args:
-            years: Number of years of history to load
-            
-        Returns:
-            bool: True if data loaded successfully
-        """
+
         self._price_history = fetch_long_history(self._symbol, years=years)
         return not self._price_history.empty
     
     def predict(self, future_days: int = 365):
-        """
-        Generate price prediction using linear regression.
-        
-        Time Complexity: O(n) where n = historical data points
-        Space Complexity: O(n) for regression calculations
-        
-        Args:
-            future_days: Days into future to predict
-            
-        Returns:
-            dict or None: Prediction results
-        """
+
         if self._price_history is None or self._price_history.empty:
             if not self.load_history():
                 return None
@@ -230,34 +169,18 @@ class StockPredictor:
         return self._prediction
     
     def get_current_price(self):
-        """
-        Get current stock price.
-        
-        Returns:
-            float or None: Current price
-        """
         if self._prediction:
             return self._prediction.get("current_price")
         return fetch_current_price(self._symbol)
     
     def get_predicted_price(self):
-        """
-        Get predicted future price.
-        
-        Returns:
-            float or None: Predicted price
-        """
+
         if not self._prediction:
             self.predict()
         return self._prediction.get("predicted_price") if self._prediction else None
     
     def get_prediction_summary(self):
-        """
-        Get formatted prediction summary.
-        
-        Returns:
-            dict: Summary with current, predicted, change, and trend
-        """
+
         if not self._prediction:
             self.predict()
         
